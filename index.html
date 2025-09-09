@@ -1,0 +1,1166 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Firebase Data Connect con Flutter</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://storage.googleapis.com/claat-public/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14" ga4id=""></google-codelab-analytics>
+  <google-codelab codelab-gaid=""
+                  codelab-ga4id=""
+                  id="data-connect-flutter"
+                  title="Firebase Data Connect con Flutter"
+                  environment="web"
+                  feedback-link="https://github.com/FabianVarela">
+    
+      <google-codelab-step label="Taller Práctico" duration="2">
+        <h2 is-upgraded>Bienvenido al taller de Firebase DataConnect con Flutter en el Flutter conf Latam 2025</h2>
+<h2 is-upgraded><strong>Objetivos del Taller</strong> 🎯</h2>
+<p>Al finalizar este taller, serás capaz de:</p>
+<ul>
+<li>Configurar Firebase Data Connect con PostgreSQL.</li>
+<li>Diseñar esquemas GraphQL para aplicaciones reales.</li>
+<li>Integrar Data Connect con Flutter.</li>
+</ul>
+<p>Como reto....</p>
+<ul>
+<li>Crear búsquedas semánticas usando vectores.</li>
+<li>Implementar funcionalidades básicas de IA con Firebase AI Logic.</li>
+</ul>
+<h2 is-upgraded><strong>Requisitos Previos</strong> 📋</h2>
+<ul>
+<li>Flutter SDK instalado.</li>
+<li>Cuenta de Firebase con plan Blaze.</li>
+<li>Editor de código (VS Code recomendado).</li>
+<li>Instalar Node para los paquetes de npm de Firebase.</li>
+<li>Extension de Firebase Data Connect para VS Code.</li>
+<li>Conocimientos básicos de SQL, Flutter, Dart y GraphQL.</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Configuración inicial" duration="20">
+        <h2 is-upgraded><strong>Tiempo: 20 min</strong> 🚀</h2>
+<h3 is-upgraded><strong>Paso 1: Crear el proyecto Firebase</strong></h3>
+<ol type="1">
+<li>Ve a <a href="https://console.firebase.google.com" target="_blank">Firebase Console</a>.</li>
+<li>Crea un nuevo proyecto llamado &#34;digital-library&#34;.</li>
+<li><strong>Importante:</strong> Asegúrate de estar en el Plan Blaze.</li>
+</ol>
+<h3 is-upgraded><strong>Paso 2: Habilitar Data Connect</strong></h3>
+<ol type="1">
+<li>En la consola Firebase, ve a <strong>Data Connect</strong>.</li>
+<li>Haz clic en <strong>&#34;Get started with Gemini&#34;</strong>.</li>
+<li>Da clic en el botón que dice <strong>Omitir el esquema</strong>. Para crear el esquema manual.</li>
+<li>Selecciona tu región (recomendado: us-central1).</li>
+<li>Espera ~15 minutos mientras se aprovisiona PostgreSQL.</li>
+</ol>
+<h3 is-upgraded><strong>Paso 3: Crear proyecto Flutter (con VGV CLI)</strong></h3>
+<p>Para Mac/windows con Powershell.</p>
+<pre><code language="language-bash" class="language-bash"># Instalar VGV CLI
+dart pub global activate very_good_cli
+
+# Crear proyecto Flutter con VGV CLI
+very_good create flutter_app digital_library --desc &#34;My custom library app&#34; --application-id &#34;com.digital_library.app&#34;
+
+# Ir al directorio del proyecto
+cd digital_library
+</code></pre>
+<h3 is-upgraded><strong>Paso 4: Configurar las herramientas de Firebase</strong></h3>
+<p>Para Mac.</p>
+<pre><code language="language-bash" class="language-bash"># Instalar Firebase CLI
+sudo npm install -g firebase-tools
+
+# Iniciar sesión en Firebase
+firebase login
+
+# Agregar el paquete global de FlutterFire CLI.
+dart pub global activate flutterfire_cli
+</code></pre>
+<p>Para Windows con Powershell.</p>
+<pre><code language="language-powershell" class="language-powershell"># Instalar Firebase CLI
+npm install -g firebase-tools
+
+# Configurar Firebase
+firebase login
+</code></pre>
+<h3 is-upgraded><strong>Paso 5: Dependencias en el proyecto de Flutter</strong></h3>
+<p>Agrega los siguientes paquetes en el archivo <code>pubspec.yaml</code>. Agregalos en orden alfábetico</p>
+<pre><code language="language-yaml" class="language-yaml">  cached_network_image: ^3.4.1
+  dio: ^5.9.0
+  firebase_core: ^4.1.0
+  firebase_data_connect: ^0.2.0+2
+</code></pre>
+<h3 is-upgraded><strong>Paso 6: Iniciar Data Connect</strong></h3>
+<p>Revisa en la consola de Firebase en el botón de settings.</p>
+<p class="image-container"><img alt="firebase-settings" src="img/689cfbdcab121114.png"></p>
+<p>Y ve a donde dice, <em>Configuración del proyecto</em>. Luego revisa el Id del proyecto y copialo.</p>
+<p class="image-container"><img alt="firebase-project-id-title" src="img/e973d182d4508f66.png"></p>
+<ul>
+<li>Abrir el proyecto en VS Code.</li>
+<li>Agregar la extensión de VS Code de <a href="https://marketplace.visualstudio.com/items?itemName=GoogleCloudTools.firebase-dataconnect-vscode" target="_blank">Data Connect</a></li>
+</ul>
+<p>Luego de instalar la extensión, busca el ícono de la extensión</p>
+<p class="image-container"><img alt="data-connect-extension-icon" src="img/baf701a3b82ba112.png"></p>
+<p>Inicia sesión (si no lo has hecho) e inicializa data connect.</p>
+<p class="image-container"><img alt="data-connect-extension-button" src="img/2410613bb4852466.png"></p>
+<p>Al darle clic al botón, te mostrará en la terminal lo siguiente:</p>
+<p class="image-container"><img alt="firebase-console-init" src="img/f4e0dbb80a9e7561.png"></p>
+<p>Selecciona la opción: <em>Use an existing project</em>. Después, selecciona el proyecto ya creado con el nombre <em>digital-library</em></p>
+<p>Primero, la consola te mostrará que generes un esquema con Gemini. <strong>Omite esa opción</strong>. <img alt="data-connect-setup-1" src="img/8cb0948f9d8c6055.png"></p>
+<p>Segundo, selecciona el location, por defecto es <em>us-central1</em>. <img alt="data-connect-setup-2" src="img/f86d9cd738ab755.png"></p>
+<p>Tercero, el crerará las inatancias de Cloud SQL, mediante GCP. Además creará un esquema de ejemplo. <img alt="data-connect-setup-3" src="img/5986f50dd9ac6e97.png"></p>
+<p>Finalmente, te mostrará en la extensión, que ha sido creado todo con éxtio. <img alt="data-connect-setup-4" src="img/97e73f34c4c609ce.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Diseño del Esquema GraphQL" duration="15">
+        <h2 is-upgraded><strong>Tiempo: 15 min</strong> 📚</h2>
+<p>Es posible que al iniciar data connect, te haya creado unos archivos <code>gql</code> y <code>dart</code> de ejemplo, así que vamos a hacer los siguientes pasos.</p>
+<ul>
+<li>Elimina la carpeta: <code>lib/dataconnect_generated</code></li>
+<li>Renombra la carpeta <em>example</em>, por <em>digital_library</em></li>
+<li>En el archivo <code>dataconnect/dataconnect.yaml</code>, modifica <em>example</em>, por <em>digital_library</em>.</li>
+<li>En el archivo en <code>dataconnect/digital_library/connector.yaml</code>, reemplaza lo siguiente:</li>
+</ul>
+<pre><code language="language-yaml" class="language-yaml">connectorId: digital_library
+generate:
+  dartSdk:
+    - outputDir: ../../lib/digital_library_generated
+      package: digital_library_generated
+</code></pre>
+<h3 is-upgraded><strong>Paso 1: Crear el esquema</strong></h3>
+<p>Ve al archivo <code>dataconnect/schema/schema.gql</code>:</p>
+<p>Elimina el contenido de ejemplo y agrega el esquema de la tabla de <code>Book</code>.</p>
+<pre><code language="language-graphql" class="language-graphql">type Book @table {
+  id: UUID! @default(expr: &#34;uuidV4()&#34;)
+  title: String!
+  author: String!
+  isbn: String @unique
+  genre: [String!]!
+  synopsis: String
+  publicationYear: Int
+  pages: Int
+  rating: Float @default(value: 0.0)
+  coverUrl: String
+  createdAt: Timestamp! @default(expr: &#34;request.time&#34;)
+  updatedAt: Timestamp! @default(expr: &#34;request.time&#34;)
+}
+</code></pre>
+<p>Después, agrega el esquema de la tabla de <code>Users</code>.</p>
+<pre><code language="language-graphql" class="language-graphql">type User @table {
+  id: UUID! @default(expr: &#34;uuidV4()&#34;)
+  name: String!
+  email: String! @unique
+  createdAt: Timestamp! @default(expr: &#34;request.time&#34;)
+}
+</code></pre>
+<p>Finalmente, agrega el esquema de la tabla de <code>ReadingList</code>.</p>
+<pre><code language="language-graphql" class="language-graphql">type ReadingList @table {
+  id: UUID! @default(expr: &#34;uuidV4()&#34;)
+  userId: UUID!
+  bookId: UUID!
+  status: String! # &#34;want_to_read&#34;, &#34;reading&#34;, &#34;completed&#34;
+  dateAdded: Timestamp! @default(expr: &#34;request.time&#34;)
+
+  user: User! @ref(fields: &#34;userId&#34;, references: &#34;id&#34;)
+  book: Book! @ref(fields: &#34;bookId&#34;, references: &#34;id&#34;)
+}
+</code></pre>
+<h3 is-upgraded><strong>Paso 2: Crear consultas básicas</strong></h3>
+<p>Ve al archivo <code>dataconnect/digital_library/queries.gql</code>:</p>
+<p>Elimina el contenido de ejemplo y agrega el <em>query</em> para obtener todos los libros.</p>
+<pre><code language="language-graphql" class="language-graphql">query GetAllBooks {
+  books {
+    id
+    title
+    author
+    genre
+    synopsis
+    publicationYear
+    rating
+    coverUrl
+  }
+}
+</code></pre>
+<p>Luego agrega el <em>query</em> para buscar por título o autor.</p>
+<pre><code language="language-graphql" class="language-graphql">query SearchBooks($searchTerm: String!) {
+  books(
+    where: {
+      _or: [
+        { title: { contains: $searchTerm } }
+        { author: { contains: $searchTerm } }
+      ]
+    }
+  ) {
+    id
+    title
+    author
+    genre
+    synopsis
+    rating
+    coverUrl
+  }
+}
+</code></pre>
+<p>Ahora, agrega el <em>query</em> para buscar por género literario.</p>
+<pre><code language="language-graphql" class="language-graphql">query GetBooksByGenre($genre: String!) {
+  books(where: { genre: { includes: $genre } }) {
+    id
+    title
+    author
+    genre
+    synopsis
+    rating
+    coverUrl
+  }
+}
+</code></pre>
+<p>Finalmente agrega el <em>query</em> para buscar los libros por usuario.</p>
+<pre><code language="language-graphql" class="language-graphql">query GetUserReadingList($userId: UUID!) {
+  readingLists(where: { userId: { eq: $userId } }) {
+    id
+    status
+    dateAdded
+    book {
+      id
+      title
+      author
+      coverUrl
+      rating
+    }
+  }
+}
+</code></pre>
+<h3 is-upgraded><strong>Paso 3: Crear mutaciones</strong></h3>
+<p>Ve al archivo <code>dataconnect/digital_library/mutations.gql</code>:</p>
+<p>Elimina el contenido de ejemplo y agrega el <em>mutation</em> para agregar un libro.</p>
+<pre><code language="language-graphql" class="language-graphql">mutation AddBook(
+  $title: String!
+  $author: String!
+  $isbn: String
+  $genre: [String!]!
+  $synopsis: String
+  $publicationYear: Int
+  $pages: Int
+  $coverUrl: String
+) {
+  book_insert(
+    data: {
+      title: $title
+      author: $author
+      isbn: $isbn
+      genre: $genre
+      synopsis: $synopsis
+      publicationYear: $publicationYear
+      pages: $pages
+      coverUrl: $coverUrl
+    }
+  )
+}
+</code></pre>
+<p>Luego agrega el <em>mutation</em> para agregar el usuario.</p>
+<pre><code language="language-graphql" class="language-graphql">mutation CreateUser($name: String!, $email: String!) {
+  user_insert(data: { name: $name, email: $email })
+}
+</code></pre>
+<p>Después, agrega el <em>mutation</em> para agregar la lista de lectura.</p>
+<pre><code language="language-graphql" class="language-graphql">mutation AddToReadingList($userId: UUID!, $bookId: UUID!, $status: String!) {
+  readingList_insert(
+    data: { userId: $userId, bookId: $bookId, status: $status }
+  )
+}
+</code></pre>
+<p>Y finalmente agrega el <em>mutation</em> para poder actualizar el status de la lectura.</p>
+<pre><code language="language-graphql" class="language-graphql">mutation UpdateReadingStatus($readingListId: UUID!, $status: String!) {
+  readingList_update(id: $readingListId, data: { status: $status })
+}
+</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Implementación Flutter" duration="20">
+        <h2 is-upgraded><strong>Tiempo: 20 min</strong> 💻</h2>
+<h3 is-upgraded><strong>Paso 1: Ejecutar el comando de firebase para Data Connect</strong></h3>
+<p>Este paso solo es si no genera los archivos <code>dart</code> requeridos. Solo debes ejecutar el siguiente comando</p>
+<pre><code language="language-bash" class="language-bash">firebase dataconnect:sdk:generate
+</code></pre>
+<h3 is-upgraded><strong>Paso 2: Configurar Firebase</strong></h3>
+<p>Ejecuta este comando en la raíz del proyecto y reemplaza <strong>YOUR_PROJECT_ID</strong> por el Id de tu proyecto.</p>
+<pre><code language="language-bash" class="language-bash">flutterfire config --project=&lt;YOUR_PROJECT_ID&gt; \
+      --ios-bundle-id=com.digitalLibrary.app \
+      --android-package-name=com.digital_library.app \
+      --macos-bundle-id=com.digitalLibrary.app
+</code></pre>
+<p>En el proyecto ya creado con VGV CLI, abre el archivo <code>lib/bootstrap.dart</code> y agrega lo siguiente.</p>
+<pre><code language="language-dart" class="language-dart">import &#39;package:flutter/material.dart&#39;;
+import &#39;package:firebase_core/firebase_core.dart&#39;;
+import &#39;package:firebase_data_connect/firebase_data_connect.dart&#39;;
+import &#39;firebase_options.dart&#39;;
+
+Future&lt;void&gt; bootstrap(FutureOr&lt;Widget&gt; Function() builder) async {
+  // FlutterError...
+
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  // runApp...
+}
+</code></pre>
+<h3 is-upgraded><strong>Paso 2.5: Archivos generados de Data Connect</strong></h3>
+<p>Es posible que los archivos generados en la carpeta <code>lib/digital_library_generated</code> salgan algunos errores. Para solucionarlo de la forma rápida (no recomendable), debes agregar esto en el archivo de <code>analysis_options.yaml</code>.</p>
+<pre><code language="language-yaml" class="language-yaml">analyzer:
+  exclude:
+    - lib/l10n/gen/*
+    - lib/**_generated/*
+</code></pre>
+<h3 is-upgraded><strong>Paso 3: Pantalla principal</strong></h3>
+<p>Crear el siguiente archivo <code>home/view/home_page.dart</code> y agregar lo siguiente.</p>
+<pre><code language="language-dart" class="language-dart">import &#39;package:digital_library/digital_library_generated/digital_library.dart&#39;;
+import &#39;package:flutter/material.dart&#39;;
+
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
+  @override
+  State&lt;HomeScreen&gt; createState() =&gt; _HomeScreenState();
+}
+
+class _HomeScreenState extends State&lt;HomeScreen&gt; {
+  final TextEditingController _searchController = TextEditingController();
+
+  List&lt;Map&lt;String, dynamic&gt;&gt; books = [];
+  String selectedGenre = &#39;Todos&#39;;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadBooks();
+  }
+
+  Future&lt;void&gt; _loadBooks() async {
+    final result = await DigitalLibraryConnector.instance
+        .getAllBooks()
+        .execute();
+
+    setState(() =&gt; books = result.data.books.map((e) =&gt; e.toJson()).toList());
+  }
+
+  Future&lt;void&gt; _searchBooks() async {
+    if (_searchController.text.isNotEmpty) {
+      final result = await DigitalLibraryConnector.instance
+          .searchBooks(searchTerm: _searchController.text)
+          .execute();
+
+      setState(() =&gt; books = result.data.books.map((e) =&gt; e.toJson()).toList());
+    } else {
+      await _loadBooks();
+    }
+  }
+
+  Future&lt;void&gt; _filterByGenre(String genre) async {
+    if (genre == &#39;Todos&#39;) {
+      await _loadBooks();
+    } else {
+      final result = await DigitalLibraryConnector.instance
+          .getBooksByGenre(genre: genre)
+          .execute();
+
+      setState(() {
+        books = result.data.books.map((e) =&gt; e.toJson()).toList();
+        selectedGenre = genre;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text(&#39;Digital Library&#39;),
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+      ),
+      body: Column(
+        children: &lt;Widget&gt;[
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: &#39;Buscar por título o autor...&#39;,
+                prefixIcon: const Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.clear),
+                  onPressed: () {
+                    _searchController.clear();
+                    _loadBooks();
+                  },
+                ),
+              ),
+              onSubmitted: (_) =&gt; _searchBooks(),
+            ),
+          ),
+          SizedBox(
+            height: 50,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              children:
+                  [
+                        &#39;Todos&#39;,
+                        &#39;Ficción&#39;,
+                        &#39;No Ficción&#39;,
+                        &#39;Ciencia&#39;,
+                        &#39;Historia&#39;,
+                        &#39;Biografía&#39;,
+                      ]
+                      .map(
+                        (genre) =&gt; Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: FilterChip(
+                            label: Text(genre),
+                            selected: selectedGenre == genre,
+                            onSelected: (_) =&gt; _filterByGenre(genre),
+                          ),
+                        ),
+                      )
+                      .toList(),
+            ),
+          ),
+          Expanded(
+            child: books.isEmpty
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.book, size: 64, color: Colors.grey),
+                        const Text(
+                          &#39;No hay libros en tu biblioteca&#39;,
+                          style: TextStyle(fontSize: 18, color: Colors.grey),
+                        ),
+                        const SizedBox(height: 16),
+                        ElevatedButton.icon(
+                          onPressed: () =&gt; Navigator.push(
+                            context,
+                            MaterialPageRoute&lt;void&gt;(
+                              builder: (context) =&gt; AddBookScreen(),
+                            ),
+                          ).then((_) =&gt; _loadBooks()),
+                          icon: const Icon(Icons.add),
+                          label: const Text(&#39;Agregar primer libro&#39;),
+                        ),
+                      ],
+                    ),
+                  )
+                : ListView.builder(
+                    itemCount: books.length,
+                    itemBuilder: (context, index) {
+                      final book = books[index];
+                      return Card(
+                        margin: const EdgeInsets.all(8),
+                        child: ListTile(
+                          leading: book[&#39;coverUrl&#39;] != null
+                              ? ClipRRect(
+                                  borderRadius: BorderRadius.circular(4),
+                                  child: Image.network(
+                                    book[&#39;coverUrl&#39;] as String,
+                                    width: 50,
+                                    height: 70,
+                                    fit: BoxFit.cover,
+                                    errorBuilder:
+                                        (context, error, stackTrace) =&gt;
+                                            const Icon(Icons.book, size: 50),
+                                  ),
+                                )
+                              : const Icon(Icons.book, size: 50),
+                          title: Text(
+                            book[&#39;title&#39;] as String,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(&#39;Por: ${book[&#39;author&#39;]}&#39;),
+                              if (book[&#39;genre&#39;] != null &amp;&amp;
+                                  (book[&#39;genre&#39;] as List&lt;String&gt;).isNotEmpty)
+                                Text(
+                                  &#39;Géneros: ${(book[&#39;genre&#39;] as List&lt;String&gt;).join(&#39;, &#39;)}&#39;,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                              if (book[&#39;rating&#39;] != null &amp;&amp;
+                                  (book[&#39;rating&#39;] as double) &gt; 0)
+                                Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.star,
+                                      size: 16,
+                                      color: Colors.amber,
+                                    ),
+                                    Text(
+                                      &#39; ${(book[&#39;rating&#39;] as double).toStringAsFixed(1)}&#39;,
+                                    ),
+                                  ],
+                                ),
+                            ],
+                          ),
+                          isThreeLine: true,
+                        ),
+                      );
+                    },
+                  ),
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () =&gt; Navigator.push(
+          context,
+          MaterialPageRoute&lt;void&gt;(builder: (context) =&gt; AddBookScreen()),
+        ).then((_) =&gt; _loadBooks()),
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+}
+</code></pre>
+<p>NOTA: Si hacen que esta pantalla use un state management como Bloc/Riverpod, es punto adicional.</p>
+<h3 is-upgraded><strong>Paso 4: Pantalla para agregar libros</strong></h3>
+<p>Crear el siguiente archivo <code>home/view/add_book_page.dart</code> y agregar lo siguiente.</p>
+<pre><code language="language-dart" class="language-dart">import &#39;package:digital_library/digital_library_generated/digital_library.dart&#39;;
+import &#39;package:flutter/material.dart&#39;;
+
+class AddBookScreen extends StatefulWidget {
+  const AddBookScreen({super.key});
+
+  @override
+  State&lt;AddBookScreen&gt; createState() =&gt; _AddBookScreenState();
+}
+
+class _AddBookScreenState extends State&lt;AddBookScreen&gt; {
+  final _formKey = GlobalKey&lt;FormState&gt;();
+
+  final _titleController = TextEditingController();
+  final _authorController = TextEditingController();
+  final _isbnController = TextEditingController();
+  final _synopsisController = TextEditingController();
+  final _yearController = TextEditingController();
+  final _pagesController = TextEditingController();
+  final _coverUrlController = TextEditingController();
+
+  List&lt;String&gt; selectedGenres = [];
+  final List&lt;String&gt; availableGenres = [
+    &#39;Ficción&#39;,
+    &#39;No Ficción&#39;,
+    &#39;Ciencia&#39;,
+    &#39;Historia&#39;,
+    &#39;Biografía&#39;,
+    &#39;Fantasía&#39;,
+    &#39;Romance&#39;,
+    &#39;Misterio&#39;,
+    &#39;Thriller&#39;,
+    &#39;Ciencia Ficción&#39;,
+    &#39;Autoayuda&#39;,
+    &#39;Tecnología&#39;,
+    &#39;Arte&#39;,
+    &#39;Cocina&#39;,
+    &#39;Viajes&#39;,
+  ];
+
+  bool isLoading = false;
+
+  Future&lt;void&gt; _saveBook() async {
+    if (_formKey.currentState!.validate() &amp;&amp; selectedGenres.isNotEmpty) {
+      try {
+        setState(() =&gt; isLoading = true);
+
+        await DigitalLibraryConnector.instance
+            .addBook(
+              title: _titleController.text.trim(),
+              author: _authorController.text.trim(),
+              genre: selectedGenres,
+            )
+            .isbn(
+              _isbnController.text.trim().isEmpty
+                  ? null
+                  : _isbnController.text.trim(),
+            )
+            .synopsis(
+              _synopsisController.text.trim().isEmpty
+                  ? null
+                  : _synopsisController.text.trim(),
+            )
+            .publicationYear(
+              _yearController.text.trim().isEmpty
+                  ? null
+                  : int.tryParse(_yearController.text.trim()),
+            )
+            .pages(
+              _pagesController.text.trim().isEmpty
+                  ? null
+                  : int.tryParse(_pagesController.text.trim()),
+            )
+            .coverUrl(
+              _coverUrlController.text.trim().isEmpty
+                  ? null
+                  : _coverUrlController.text.trim(),
+            )
+            .execute();
+
+        setState(() =&gt; isLoading = false);
+
+        _showMessage(&#39;Libro agregado exitosamente&#39;);
+        if (mounted) Navigator.pop(context);
+      } on Exception catch (_) {
+        _showMessage(&#39;Error al agregar el libro&#39;);
+      }
+    } else if (selectedGenres.isEmpty) {
+      _showMessage(&#39;Selecciona al menos un género&#39;);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text(&#39;Agregar Libro&#39;),
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+      ),
+      body: Form(
+        key: _formKey,
+        child: ListView(
+          padding: const EdgeInsets.all(16),
+          children: &lt;Widget&gt;[
+            TextFormField(
+              controller: _titleController,
+              decoration: const InputDecoration(
+                labelText: &#39;Título *&#39;,
+                border: OutlineInputBorder(),
+              ),
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) {
+                  return &#39;El título es requerido&#39;;
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _authorController,
+              decoration: const InputDecoration(
+                labelText: &#39;Autor *&#39;,
+                border: OutlineInputBorder(),
+              ),
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) {
+                  return &#39;El autor es requerido&#39;;
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _isbnController,
+              decoration: const InputDecoration(
+                labelText: &#39;ISBN (opcional)&#39;,
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              &#39;Géneros *&#39;,
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              children: availableGenres.map((genre) {
+                return FilterChip(
+                  label: Text(genre),
+                  selected: selectedGenres.contains(genre),
+                  onSelected: (selected) {
+                    setState(() {
+                      if (selected) {
+                        selectedGenres.add(genre);
+                      } else {
+                        selectedGenres.remove(genre);
+                      }
+                    });
+                  },
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _synopsisController,
+              decoration: const InputDecoration(
+                labelText: &#39;Sinopsis (opcional)&#39;,
+                border: OutlineInputBorder(),
+              ),
+              maxLines: 3,
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: &lt;Widget&gt;[
+                Expanded(
+                  child: TextFormField(
+                    controller: _yearController,
+                    decoration: const InputDecoration(
+                      labelText: &#39;Año publicación&#39;,
+                      border: OutlineInputBorder(),
+                    ),
+                    keyboardType: TextInputType.number,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: TextFormField(
+                    controller: _pagesController,
+                    decoration: const InputDecoration(
+                      labelText: &#39;Páginas&#39;,
+                      border: OutlineInputBorder(),
+                    ),
+                    keyboardType: TextInputType.number,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _coverUrlController,
+              decoration: const InputDecoration(
+                labelText: &#39;URL de portada (opcional)&#39;,
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 32),
+            SizedBox(
+              height: 50,
+              child: ElevatedButton(
+                onPressed: isLoading ? null : _saveBook,
+                child: isLoading
+                    ? const CircularProgressIndicator()
+                    : const Text(
+                        &#39;Guardar Libro&#39;,
+                        style: TextStyle(fontSize: 16),
+                      ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _authorController.dispose();
+    _isbnController.dispose();
+    _synopsisController.dispose();
+    _yearController.dispose();
+    _pagesController.dispose();
+    _coverUrlController.dispose();
+    super.dispose();
+  }
+}
+</code></pre>
+<p>NOTA: Si hacen que esta pantalla use un state management como Bloc/Riverpod, es punto adicional.</p>
+<h3 is-upgraded><strong>Paso 5: Cambiar la pantalla inicial</strong></h3>
+<p>En el archivo <code>lib/app/view/app.dart</code>, cambia el home por la nueva pantalla de inicio.</p>
+<pre><code language="language-dart" class="language-dart">return MaterialApp(
+  // ...
+  home: const HomeScreen(),
+);
+</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Seed de la información" duration="10">
+        <h2 is-upgraded><strong>Tiempo: 10 min</strong> 🌱</h2>
+<h3 is-upgraded><strong>Paso 1: Agregar archivo JSON con la data</strong></h3>
+<p>Agregar la siguiente <strong>mutation</strong>, en el archivo <code>dataconnect/digital_library/mutations.gql</code>.</p>
+<pre><code language="language-graphql" class="language-graphql">mutation AddBook(
+  $title: String!
+  $author: String!
+  $isbn: String
+  $genre: [String!]!
+  $synopsis: String
+  $publicationYear: Int
+  $pages: Int
+  $coverUrl: String
+) {
+  book_insert(
+    data: {
+      title: $title
+      author: $author
+      isbn: $isbn
+      genre: $genre
+      synopsis: $synopsis
+      publicationYear: $publicationYear
+      pages: $pages
+      coverUrl: $coverUrl
+    }
+  )
+}
+
+mutation CreateUser($name: String!, $email: String!) {
+  user_insert(data: { name: $name, email: $email })
+}
+
+mutation AddToReadingList($userId: UUID!, $bookId: UUID!, $status: String!) {
+  readingList_insert(
+    data: { userId: $userId, bookId: $bookId, status: $status }
+  )
+}
+
+mutation UpdateReadingStatus($readingListId: UUID!, $status: String!) {
+  readingList_update(id: $readingListId, data: { status: $status })
+}
+
+mutation SeedBooks {
+  book_insertMany(
+    data: [
+      {
+        title: &#34;Cien años de soledad&#34;
+        author: &#34;Gabriel García Márquez&#34;
+        isbn: &#34;9780060883287&#34;
+        genre: [&#34;Ficción&#34;, &#34;Realismo Mágico&#34;]
+        synopsis: &#34;La épica historia de la familia Buendía a lo largo de siete generaciones en el pueblo ficticio de Macondo.&#34;
+        publicationYear: 1967
+        pages: 417
+        rating: 4.8
+        coverUrl: &#34;https: //images-na.ssl-images-amazon.com/images/I/91TvVQS7loL.jpg&#34;
+      }
+      {
+        title: &#34;Dune&#34;
+        author: &#34;Frank Herbert&#34;
+        isbn: &#34;9780441172719&#34;
+        genre: [&#34;Ciencia Ficción&#34;, &#34;Aventura&#34;]
+        synopsis: &#34;Una épica historia sobre política, religión y ecología en el desierto planeta Arrakis, donde la especia melange es el recurso más valioso del universo.&#34;
+        publicationYear: 1965
+        pages: 688
+        rating: 4.5
+        coverUrl: &#34;https: //images-na.ssl-images-amazon.com/images/I/81zN7udGRUL.jpg&#34;
+      }
+      {
+        title: &#34;1984&#34;
+        author: &#34;George Orwell&#34;
+        isbn: &#34;9780451524935&#34;
+        genre: [&#34;Ficción&#34;, &#34;Distopía&#34;]
+        synopsis: &#34;Una novela distópica sobre el totalitarismo y la vigilancia gubernamental en una sociedad donde el Gran Hermano lo ve todo.&#34;
+        publicationYear: 1949
+        pages: 328
+        rating: 4.7
+        coverUrl: &#34;https: //images-na.ssl-images-amazon.com/images/I/71kxa1-0mfL.jpg&#34;
+      }
+      {
+        title: &#34;El Alquimista&#34;
+        author: &#34;Paulo Coelho&#34;
+        isbn: &#34;9780061122415&#34;
+        genre: [&#34;Ficción&#34;, &#34;Autoayuda&#34;]
+        synopsis: &#34;La historia de Santiago, un joven pastor andaluz que viaja desde España hasta las pirámides de Egipto en busca de un tesoro.&#34;
+        publicationYear: 1988
+        pages: 163
+        rating: 4.2
+        coverUrl: &#34;https: //images-na.ssl-images-amazon.com/images/I/71aFt4+OTOL.jpg&#34;
+      }
+      {
+        title: &#34;Sapiens: De animales a dioses&#34;
+        author: &#34;Yuval Noah Harari&#34;
+        isbn: &#34;9780062316097&#34;
+        genre: [&#34;No Ficción&#34;, &#34;Historia&#34;]
+        synopsis: &#34;Una exploración fascinante de la historia de la humanidad, desde la evolución hasta los desafíos del siglo XXI.&#34;
+        publicationYear: 2011
+        pages: 443
+        rating: 4.6
+        coverUrl: &#34;https: //images-na.ssl-images-amazon.com/images/I/713jIoMO3UL.jpg&#34;
+      }
+      {
+        title: &#34;El Código Da Vinci&#34;
+        author: &#34;Dan Brown&#34;
+        isbn: &#34;9780307474278&#34;
+        genre: [&#34;Misterio&#34;, &#34;Thriller&#34;]
+        synopsis: &#34;Robert Langdon se ve envuelto en un misterio que involucra sociedades secretas, arte renacentista y conspiraciones religiosas.&#34;
+        publicationYear: 2003
+        pages: 454
+        rating: 4.1
+        coverUrl: &#34;https: //images-na.ssl-images-amazon.com/images/I/815WORuYMML.jpg&#34;
+      }
+      {
+        title: &#34;Steve Jobs&#34;
+        author: &#34;Walter Isaacson&#34;
+        isbn: &#34;9781451648539&#34;
+        genre: [&#34;Biografía&#34;, &#34;Tecnología&#34;]
+        synopsis: &#34;La biografía autorizada del cofundador de Apple, basada en más de cuarenta entrevistas con Jobs y más de cien con familiares, amigos y colegas.&#34;
+        publicationYear: 2011
+        pages: 656
+        rating: 4.4
+        coverUrl: &#34;https: //images-na.ssl-images-amazon.com/images/I/81VStYnDGrL.jpg&#34;
+      }
+      {
+        title: &#34;El Señor de los Anillos: La Comunidad del Anillo&#34;
+        author: &#34;J.R.R. Tolkien&#34;
+        isbn: &#34;9780547928210&#34;
+        genre: [&#34;Fantasía&#34;, &#34;Aventura&#34;]
+        synopsis: &#34;Frodo Bolsón hereda un anillo mágico de su tío Bilbo y debe emprender un peligroso viaje para destruirlo.&#34;
+        publicationYear: 1954
+        pages: 423
+        rating: 4.9
+        coverUrl: &#34;https: //images-na.ssl-images-amazon.com/images/I/91jBdG2aHML.jpg&#34;
+      }
+      {
+        title: &#34;Orgullo y Prejuicio&#34;
+        author: &#34;Jane Austen&#34;
+        isbn: &#34;9780141439518&#34;
+        genre: [&#34;Romance&#34;, &#34;Ficción&#34;]
+        synopsis: &#34;La compleja relación entre Elizabeth Bennet y el orgulloso Sr. Darcy en la Inglaterra del siglo XIX.&#34;
+        publicationYear: 1813
+        pages: 279
+        rating: 4.3
+        coverUrl: &#34;https: //images-na.ssl-images-amazon.com/images/I/81NLDvyAHrL.jpg&#34;
+      }
+      {
+        title: &#34;Hábitos Atómicos&#34;
+        author: &#34;James Clear&#34;
+        isbn: &#34;9780735211292&#34;
+        genre: [&#34;Autoayuda&#34;, &#34;Productividad&#34;]
+        synopsis: &#34;Un método revolucionario para crear buenos hábitos y eliminar los malos, basado en los últimos descubrimientos de la neurociencia.&#34;
+        publicationYear: 2018
+        pages: 320
+        rating: 4.7
+        coverUrl: &#34;https: //images-na.ssl-images-amazon.com/images/I/81YkqyaFVEL.jpg&#34;
+      }
+      {
+        title: &#34;El Arte de la Guerra&#34;
+        author: &#34;Sun Tzu&#34;
+        isbn: &#34;9781599869773&#34;
+        genre: [&#34;Filosofía&#34;, &#34;Estrategia&#34;]
+        synopsis: &#34;El tratado militar más influyente del mundo, aplicable tanto en la guerra como en los negocios y la vida cotidiana.&#34;
+        publicationYear: -500
+        pages: 96
+        rating: 4.0
+        coverUrl: &#34;https: //images-na.ssl-images-amazon.com/images/I/81L-MkU8S-L.jpg&#34;
+      }
+      {
+        title: &#34;Piensa y Hazte Rico&#34;
+        author: &#34;Napoleon Hill&#34;
+        isbn: &#34;9781585424331&#34;
+        genre: [&#34;Autoayuda&#34;, &#34;Negocios&#34;]
+        synopsis: &#34;Los principios del éxito basados en el estudio de más de 500 millonarios de la época, incluyendo Andrew Carnegie.&#34;
+        publicationYear: 1937
+        pages: 320
+        rating: 4.2
+        coverUrl: &#34;https: //images-na.ssl-images-amazon.com/images/I/71UypkUjStL.jpg&#34;
+      }
+      {
+        title: &#34;El Hobbit&#34;
+        author: &#34;J.R.R. Tolkien&#34;
+        isbn: &#34;9780547928227&#34;
+        genre: [&#34;Fantasía&#34;, &#34;Aventura&#34;]
+        synopsis: &#34;Bilbo Bolsón se embarca en una aventura épica con trece enanos para recuperar el tesoro guardado por el dragón Smaug.&#34;
+        publicationYear: 1937
+        pages: 366
+        rating: 4.6
+        coverUrl: &#34;https: //images-na.ssl-images-amazon.com/images/I/A1E1w1jwApL.jpg&#34;
+      }
+      {
+        title: &#34;Matar a un ruiseñor&#34;
+        author: &#34;Harper Lee&#34;
+        isbn: &#34;9780060935467&#34;
+        genre: [&#34;Ficción&#34;, &#34;Drama&#34;]
+        synopsis: &#34;Scout Finch narra la historia de su infancia en Alabama, cuando su padre defiende a un hombre negro acusado injustamente.&#34;
+        publicationYear: 1960
+        pages: 376
+        rating: 4.8
+        coverUrl: &#34;https: //images-na.ssl-images-amazon.com/images/I/81aY1lxk+9L.jpg&#34;
+      }
+      {
+        title: &#34;La Chica del Tren&#34;
+        author: &#34;Paula Hawkins&#34;
+        isbn: &#34;9781594634024&#34;
+        genre: [&#34;Thriller&#34;, &#34;Misterio&#34;]
+        synopsis: &#34;Rachel toma el mismo tren todos los días y observa la misma casa. Un día es testigo de algo impactante que cambia vidas para siempre.&#34;
+        publicationYear: 2015
+        pages: 325
+        rating: 3.9
+        coverUrl: &#34;https: //images-na.ssl-images-amazon.com/images/I/81a4E0hAanL.jpg&#34;
+      }
+      {
+        title: &#34;El Poder del Ahora&#34;
+        author: &#34;Eckhart Tolle&#34;
+        isbn: &#34;9781577314806&#34;
+        genre: [&#34;Autoayuda&#34;, &#34;Espiritualidad&#34;]
+        synopsis: &#34;Una guía para la transformación espiritual que enseña cómo vivir en el momento presente y encontrar la paz interior.&#34;
+        publicationYear: 1997
+        pages: 236
+        rating: 4.3
+        coverUrl: &#34;https: //images-na.ssl-images-amazon.com/images/I/71QKQ9mwV7L.jpg&#34;
+      }
+      {
+        title: &#34;Inteligencia Emocional&#34;
+        author: &#34;Daniel Goleman&#34;
+        isbn: &#34;9780553383713&#34;
+        genre: [&#34;Psicología&#34;, &#34;Autoayuda&#34;]
+        synopsis: &#34;Una exploración revolucionaria de cómo la inteligencia emocional puede ser más importante que el CI para el éxito en la vida.&#34;
+        publicationYear: 1995
+        pages: 352
+        rating: 4.1
+        coverUrl: &#34;https: //images-na.ssl-images-amazon.com/images/I/71aG+xDKSYL.jpg&#34;
+      }
+      {
+        title: &#34;El Padrino&#34;
+        author: &#34;Mario Puzo&#34;
+        isbn: &#34;9780451205766&#34;
+        genre: [&#34;Ficción&#34;, &#34;Crimen&#34;]
+        synopsis: &#34;La saga épica de la familia Corleone y su imperio criminal en Nueva York desde 1945 hasta 1955.&#34;
+        publicationYear: 1969
+        pages: 448
+        rating: 4.4
+        coverUrl: &#34;https: //images-na.ssl-images-amazon.com/images/I/81F90PyxBlL.jpg&#34;
+      }
+      {
+        title: &#34;El Gran Gatsby&#34;
+        author: &#34;F. Scott Fitzgerald&#34;
+        isbn: &#34;9780743273565&#34;
+        genre: [&#34;Ficción&#34;, &#34;Drama&#34;]
+        synopsis: &#34;La historia de Jay Gatsby y su obsesivo amor por Daisy Buchanan en los locos años veinte.&#34;
+        publicationYear: 1925
+        pages: 180
+        rating: 4.2
+        coverUrl: &#34;https: //images-na.ssl-images-amazon.com/images/I/81af+MCATTL.jpg&#34;
+      }
+      {
+        title: &#34;El Monje que Vendió su Ferrari&#34;
+        author: &#34;Robin Sharma&#34;
+        isbn: &#34;9780062515674&#34;
+        genre: [&#34;Autoayuda&#34;, &#34;Ficción&#34;]
+        synopsis: &#34;Un abogado exitoso abandona su vida de lujos para buscar la felicidad y el propósito en los Himalayas.&#34;
+        publicationYear: 1997
+        pages: 198
+        rating: 4.0
+        coverUrl: &#34;https: //images-na.ssl-images-amazon.com/images/I/71BankcKkQL.jpg&#34;
+      }
+    ]
+  )
+}
+</code></pre>
+<h3 is-upgraded><strong>Paso 2: Agregar en el </strong><strong><code>AppBar</code></strong><strong> de </strong><strong><code>HomeScreen</code></strong><strong> un menú para hacer el seed</strong></h3>
+<pre><code language="language-dart" class="language-dart">return Scaffold(
+  appBar: AppBar(
+    title: Text(&#39;Digital Library&#39;),
+    backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+    actions: &lt;Widget&gt;[
+      IconButton(
+        onPressed: () async {
+          await DigitalLibraryConnector.instance.seedBooks().execute();
+          await _loadBooks();
+        },
+        icon: const Icon(Icons.download),
+        tooltip: &#39;Poblar Base de Datos&#39;,
+      ),
+    ],
+  ),
+  // ...
+);
+</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Cierre (NO TAN CIERRE)" duration="1">
+        <h2 is-upgraded>🎉 <strong>¡Felicitaciones!</strong></h2>
+<p>Has completado exitosamente el taller completo de Firebase Data Connect + Flutter. Además de agregar funcionalidades con IA. Ahora tienes las bases para:</p>
+<ul>
+<li>Crear aplicaciones con bases de datos relacionales en Firebase</li>
+<li>Diseñar esquemas GraphQL escalables</li>
+<li>Implementar búsquedas semánticas con vectores</li>
+<li>Integrar IA de manera efectiva en aplicaciones móviles</li>
+</ul>
+<h3 is-upgraded><strong>Próximos pasos sugeridos:</strong> Para que aprendas por tu cuenta.</h3>
+<ol type="1">
+<li>Implementar sistema de recomendaciones personalizadas</li>
+<li>Crear un chatbot para consultas sobre libros</li>
+<li>Implementar OCR para catalogar libros por medio de fotos</li>
+</ol>
+<h3 is-upgraded>📚 <strong>Recursos Adicionales</strong></h3>
+<h3 is-upgraded><strong>Documentación oficial:</strong></h3>
+<ul>
+<li><a href="https://firebase.google.com/docs/data-connect" target="_blank">Firebase Data Connect</a></li>
+<li><a href="https://firebase.flutter.dev/" target="_blank">Flutter con Firebase</a></li>
+<li><a href="https://graphql.org/learn/" target="_blank">GraphQL Syntax</a></li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Reto final" duration="30">
+        <h2 is-upgraded><strong>Tiempo: 30 min</strong> 🤖</h2>
+<h2 is-upgraded><strong>Sistema Inteligente de Biblioteca con IA</strong></h2>
+<h3 is-upgraded><strong>Tu Misión, si decides aceptarla:</strong></h3>
+<p><strong>El premio:</strong> Para los mejores 3 puestos. <img alt="dash-ec-trophy" src="img/722d0129fb9ab21f.jpg"></p>
+<p>Crear un sistema de biblioteca inteligente con múltiples funcionalidades de IA que demuestre el verdadero potencial de Firebase Data Connect.</p>
+<h3 is-upgraded>🏆 <strong>SISTEMA DE NIVELES</strong></h3>
+<h3 is-upgraded><strong>NIVEL 1: Búsqueda Semántica</strong></h3>
+<p><em>Funcionalidad básica con vectores</em></p>
+<p>Implementar búsqueda semántica que entienda intenciones:</p>
+<ul>
+<li>&#34;Libros sobre crecimiento personal&#34;</li>
+<li>&#34;Historias de aventuras épicas&#34;</li>
+<li>&#34;Biografías inspiradoras&#34;</li>
+</ul>
+<h3 is-upgraded><strong>NIVEL 2: Asistente IA Personalizado</strong></h3>
+<p><em>Sistema de recomendaciones inteligente</em></p>
+<p>Crear un asistente que analiza el perfil del usuario y recomienda libros personalizados usando Gemini.</p>
+<p>NOTA: El que realice los 2 niveles, tienes más oportunidad de ganar el trofeo.</p>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="https://storage.googleapis.com/claat-public/native-shim.js"></script>
+  <script src="https://storage.googleapis.com/claat-public/custom-elements.min.js"></script>
+  <script src="https://storage.googleapis.com/claat-public/prettify.js"></script>
+  <script src="https://storage.googleapis.com/claat-public/codelab-elements.js"></script>
+  <script src="//support.google.com/inapp/api.js"></script>
+
+</body>
+</html>
