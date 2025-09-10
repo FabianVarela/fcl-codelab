@@ -51,6 +51,8 @@
 <li>Extension de Firebase Data Connect para VS Code.</li>
 <li>Conocimientos básicos de SQL, Flutter, Dart y GraphQL.</li>
 </ul>
+<h2 is-upgraded><strong>Crédito gratis</strong></h2>
+<p>Este crédito solo aplica para este taller. Para acceder, ingresa <a href="https://trygcp.dev/e/flutter-conf-001" target="_blank">aquí</a></p>
 
 
       </google-codelab-step>
@@ -87,6 +89,9 @@ cd digital_library
 <pre><code language="language-bash" class="language-bash"># Instalar Firebase CLI
 sudo npm install -g firebase-tools
 
+# Instalar el tools de Firebase Data Connect.
+curl -sL https://firebase.tools/dataconnect | bash
+
 # Iniciar sesión en Firebase
 firebase login
 
@@ -104,6 +109,7 @@ firebase login
 <p>Agrega los siguientes paquetes en el archivo <code>pubspec.yaml</code>. Agregalos en orden alfábetico</p>
 <pre><code language="language-yaml" class="language-yaml">  cached_network_image: ^3.4.1
   dio: ^5.9.0
+  firebase_app_check: ^0.4.0+1
   firebase_core: ^4.1.0
   firebase_data_connect: ^0.2.0+2
 </code></pre>
@@ -140,7 +146,7 @@ firebase login
 <li>En el archivo <code>dataconnect/dataconnect.yaml</code>, modifica <em>example</em>, por <em>digital_library</em>.</li>
 <li>En el archivo en <code>dataconnect/digital_library/connector.yaml</code>, reemplaza lo siguiente:</li>
 </ul>
-<pre><code language="language-yaml" class="language-yaml">connectorId: digital_library
+<pre><code language="language-yaml" class="language-yaml">connectorId: digital-library
 generate:
   dartSdk:
     - outputDir: ../../lib/digital_library_generated
@@ -187,7 +193,7 @@ generate:
 <h3 is-upgraded><strong>Paso 2: Crear consultas básicas</strong></h3>
 <p>Ve al archivo <code>dataconnect/digital_library/queries.gql</code>:</p>
 <p>Elimina el contenido de ejemplo y agrega el <em>query</em> para obtener todos los libros.</p>
-<pre><code language="language-graphql" class="language-graphql">query GetAllBooks {
+<pre><code language="language-graphql" class="language-graphql">query GetAllBooks @auth(level: PUBLIC) {
   books {
     id
     title
@@ -201,7 +207,7 @@ generate:
 }
 </code></pre>
 <p>Luego agrega el <em>query</em> para buscar por título o autor.</p>
-<pre><code language="language-graphql" class="language-graphql">query SearchBooks($searchTerm: String!) {
+<pre><code language="language-graphql" class="language-graphql">query SearchBooks($searchTerm: String!) @auth(level: PUBLIC) {
   books(
     where: {
       _or: [
@@ -221,7 +227,7 @@ generate:
 }
 </code></pre>
 <p>Ahora, agrega el <em>query</em> para buscar por género literario.</p>
-<pre><code language="language-graphql" class="language-graphql">query GetBooksByGenre($genre: String!) {
+<pre><code language="language-graphql" class="language-graphql">query GetBooksByGenre($genre: String!) @auth(level: PUBLIC) {
   books(where: { genre: { includes: $genre } }) {
     id
     title
@@ -234,7 +240,7 @@ generate:
 }
 </code></pre>
 <p>Finalmente agrega el <em>query</em> para buscar los libros por usuario.</p>
-<pre><code language="language-graphql" class="language-graphql">query GetUserReadingList($userId: UUID!) {
+<pre><code language="language-graphql" class="language-graphql">query GetUserReadingList($userId: UUID!) @auth(level: PUBLIC) {
   readingLists(where: { userId: { eq: $userId } }) {
     id
     status
@@ -261,7 +267,7 @@ generate:
   $publicationYear: Int
   $pages: Int
   $coverUrl: String
-) {
+ ) @auth(level: PUBLIC) {
   book_insert(
     data: {
       title: $title
@@ -277,21 +283,25 @@ generate:
 }
 </code></pre>
 <p>Luego agrega el <em>mutation</em> para agregar el usuario.</p>
-<pre><code language="language-graphql" class="language-graphql">mutation CreateUser($name: String!, $email: String!) {
+<pre><code language="language-graphql" class="language-graphql">mutation CreateUser($name: String!, $email: String!) @auth(level: PUBLIC) {
   user_insert(data: { name: $name, email: $email })
 }
 </code></pre>
 <p>Después, agrega el <em>mutation</em> para agregar la lista de lectura.</p>
-<pre><code language="language-graphql" class="language-graphql">mutation AddToReadingList($userId: UUID!, $bookId: UUID!, $status: String!) {
+<pre><code language="language-graphql" class="language-graphql">mutation AddToReadingList($userId: UUID!, $bookId: UUID!, $status: String!) @auth(level: PUBLIC) {
   readingList_insert(
     data: { userId: $userId, bookId: $bookId, status: $status }
   )
 }
 </code></pre>
 <p>Y finalmente agrega el <em>mutation</em> para poder actualizar el status de la lectura.</p>
-<pre><code language="language-graphql" class="language-graphql">mutation UpdateReadingStatus($readingListId: UUID!, $status: String!) {
+<pre><code language="language-graphql" class="language-graphql">mutation UpdateReadingStatus($readingListId: UUID!, $status: String!) @auth(level: PUBLIC) {
   readingList_update(id: $readingListId, data: { status: $status })
 }
+</code></pre>
+<h3 is-upgraded><strong>Paso 4: Desplegar los esquemas, queries y mutations</strong></h3>
+<p>Después de que todo esté listo, debes ejecutar el siguiente comando:</p>
+<pre><code language="language-bash" class="language-bash">firebase deploy --only dataconnect
 </code></pre>
 
 
@@ -324,17 +334,24 @@ Future&lt;void&gt; bootstrap(FutureOr&lt;Widget&gt; Function() builder) async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
+  // Esto es para poder ejecutar nuestra app no registrada en Firebase en debug.
+  await FirebaseAppCheck.instance.activate(
+    appleProvider: AppleProvider.debug,
+    androidProvider: AndroidProvider.debug,
+  );
+
   // runApp...
 }
 </code></pre>
-<h3 is-upgraded><strong>Paso 2.5: Archivos generados de Data Connect</strong></h3>
+<p>Ahora debes configurar `AppCheck en Firebase con las aplicaciones ya registradas. Sigue el siguiente paso a paso <a href="https://firebase.google.com/docs/app-check/flutter/debug-provider" target="_blank">aquí</a></p>
+<h3 is-upgraded><strong>Paso 3: Archivos generados de Data Connect</strong></h3>
 <p>Es posible que los archivos generados en la carpeta <code>lib/digital_library_generated</code> salgan algunos errores. Para solucionarlo de la forma rápida (no recomendable), debes agregar esto en el archivo de <code>analysis_options.yaml</code>.</p>
 <pre><code language="language-yaml" class="language-yaml">analyzer:
   exclude:
     - lib/l10n/gen/*
     - lib/**_generated/*
 </code></pre>
-<h3 is-upgraded><strong>Paso 3: Pantalla principal</strong></h3>
+<h3 is-upgraded><strong>Paso 4: Pantalla principal</strong></h3>
 <p>Crear el siguiente archivo <code>home/view/home_page.dart</code> y agregar lo siguiente.</p>
 <pre><code language="language-dart" class="language-dart">import &#39;package:digital_library/digital_library_generated/digital_library.dart&#39;;
 import &#39;package:flutter/material.dart&#39;;
@@ -555,7 +572,7 @@ class _HomeScreenState extends State&lt;HomeScreen&gt; {
 }
 </code></pre>
 <p>NOTA: Si hacen que esta pantalla use un state management como Bloc/Riverpod, es punto adicional.</p>
-<h3 is-upgraded><strong>Paso 4: Pantalla para agregar libros</strong></h3>
+<h3 is-upgraded><strong>Paso 5: Pantalla para agregar libros</strong></h3>
 <p>Crear el siguiente archivo <code>home/view/add_book_page.dart</code> y agregar lo siguiente.</p>
 <pre><code language="language-dart" class="language-dart">import &#39;package:digital_library/digital_library_generated/digital_library.dart&#39;;
 import &#39;package:flutter/material.dart&#39;;
@@ -802,7 +819,7 @@ class _AddBookScreenState extends State&lt;AddBookScreen&gt; {
 }
 </code></pre>
 <p>NOTA: Si hacen que esta pantalla use un state management como Bloc/Riverpod, es punto adicional.</p>
-<h3 is-upgraded><strong>Paso 5: Cambiar la pantalla inicial</strong></h3>
+<h3 is-upgraded><strong>Paso 6: Cambiar la pantalla inicial</strong></h3>
 <p>En el archivo <code>lib/app/view/app.dart</code>, cambia el home por la nueva pantalla de inicio.</p>
 <pre><code language="language-dart" class="language-dart">return MaterialApp(
   // ...
@@ -826,7 +843,7 @@ class _AddBookScreenState extends State&lt;AddBookScreen&gt; {
   $publicationYear: Int
   $pages: Int
   $coverUrl: String
-) {
+) @auth(level: NO_ACCESS) {
   book_insert(
     data: {
       title: $title
