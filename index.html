@@ -343,7 +343,7 @@ Future&lt;void&gt; bootstrap(FutureOr&lt;Widget&gt; Function() builder) async {
   // runApp...
 }
 </code></pre>
-<p>Ahora debes configurar `AppCheck en Firebase con las aplicaciones ya registradas. Sigue el siguiente paso a paso <a href="https://firebase.google.com/docs/app-check/flutter/debug-provider" target="_blank">aquí</a></p>
+<p>Ahora debes configurar <code>AppCheck</code> en Firebase con las aplicaciones ya registradas. Sigue el siguiente paso a paso <a href="https://firebase.google.com/docs/app-check/flutter/debug-provider" target="_blank">aquí</a></p>
 <h3 is-upgraded><strong>Paso 3: Archivos generados de Data Connect</strong></h3>
 <p>Es posible que los archivos generados en la carpeta <code>lib/digital_library_generated</code> salgan algunos errores. Para solucionarlo de la forma rápida (no recomendable), debes agregar esto en el archivo de <code>analysis_options.yaml</code>.</p>
 <pre><code language="language-yaml" class="language-yaml">analyzer:
@@ -1163,6 +1163,81 @@ mutation SeedBooks {
 <li>&#34;Historias de aventuras épicas&#34;</li>
 <li>&#34;Biografías inspiradoras&#34;</li>
 </ul>
+<p>Para este nivel necesitas usar vectores y embeddings, te dejo una definición de embeddings <a href="https://gustavo-espindola.medium.com/qu%C3%A9-son-los-embeddings-y-c%C3%B3mo-se-utilizan-en-la-inteligencia-artificial-con-python-45b751ed86a5" target="_blank">aqui</a></p>
+<h3 is-upgraded><strong>Paso 1: Habilitar los vectores</strong></h3>
+<ul>
+<li>Debes ir a la consola de Google <a href="https://console.cloud.google.com/iam-admin/iam" target="_blank">aquí</a> y habilitar el rol de <em>Vertex AI User</em> en el usuario de <em>firebase-adminsdk</em>.</li>
+<li>Luego debes ir a <a href="https://console.cloud.google.com/sql/instances" target="_blank">Cloud SQL</a>, seleccionas la instancia y después vas al Cloud SQL Studio.</li>
+<li>Inagresas a la base de datos con las credenciales de <em>postgres</em> y escribes el siguiente query.</li>
+</ul>
+<pre><code language="language-sql" class="language-sql">CREATE EXTENSION vector;
+</code></pre>
+<h3 is-upgraded><strong>Paso 2: Actualizar esquema</strong>:</h3>
+<p>Ve al archivo <code>dataconnect/scheme/scheme.gql</code> y agrega lo siguiente:</p>
+<pre><code language="language-graphql" class="language-graphql">type Book @table {
+  # ... campos existentes ...
+  synopsisEmbedding: Vector @col(size:768)
+  searchContent: String
+}
+</code></pre>
+<p>Luego ve al archivo <code>dataconnect/digital_library/queries.gql</code> y agrega el siguiente <em>query</em>:</p>
+<pre><code language="language-graphql" class="language-graphql">query SemanticSearch($query: String!, $limit: Int = 8) @auth(level: PUBLIC) {
+  books_synopsisEmbedding_similarity(
+    compare_embed: {model: &#34;textembedding-gecko@003&#34;, text: $query},
+    method: COSINE,
+    limit: $limit
+  ) {
+    id
+    title
+    author
+    synopsis
+    genre
+    rating
+    coverUrl
+    _metadata {
+      distance
+    }
+  }
+}
+</code></pre>
+<p>Ahora en el archivo <code>dataconnect/digital_library/mutations.gql</code>, agrega lo siguiente en el <em>mutation</em> existente:</p>
+<pre><code language="language-graphql" class="language-graphql">mutation AddBook(
+  # paramétros existenes ...
+  $synopsis: String! # Vuelvelo requerido
+  # paramétros existenes ...
+) @auth(level: PUBLIC) {
+  book_insert(
+    data: {
+      # campos existentes ...
+      synopsisEmbedding_embed: {model: &#34;textembedding-gecko@003&#34;, text: $synopsis}
+    }
+  )
+}
+</code></pre>
+<p>Agrega un <em>mutation</em> para editar y borrar cada libro. <strong>Debes implementar en Flutter en cada elemento de la lista para que borre un item</strong>.</p>
+<pre><code language="language-graphql" class="language-graphql">mutation UpdateBook($id: UUID!, $synopsis: String!) @auth(level: PUBLIC) {
+  book_update(
+    id: $id
+    data: {
+      synopsis: $synopsis
+      synopsisEmbedding_embed: {
+        model: &#34;textembedding-gecko@003&#34;
+        text: $synopsis
+      }
+    }
+  )
+}
+
+mutation DeleteMovie($id: UUID!) @auth(level: PUBLIC) {
+  book_delete(id: $id)
+}
+</code></pre>
+<p>Si no se ven los cambios automáticamente, ejecuta.</p>
+<pre><code language="language-bash" class="language-bash">firebase dataconnect:sdk:generate
+</code></pre>
+<p>Y luego para desplegar los cambios</p>
+<pre><code language="language-bash" class="language-bash">firebase deploy --only dataconnect
+</code></pre>
 <h3 is-upgraded><strong>NIVEL 2: Asistente IA Personalizado</strong></h3>
 <p><em>Sistema de recomendaciones inteligente</em></p>
 <p>Crear un asistente que analiza el perfil del usuario y recomienda libros personalizados usando Gemini.</p>
