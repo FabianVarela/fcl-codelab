@@ -1,7 +1,6 @@
-Paso 1: Exportar el archivo Markdown con claat
+### Paso 1: Exportar el archivo Markdown con claat
 
 Primero, exporté el archivo Markdown del codelab usando el comando claat export:
-
 claat export -o /site /codelabs/data-connect-flutter.md
 
 Explicación:
@@ -15,7 +14,7 @@ Este comando creó/actualizó el folder data-connect-flutter/ con:
 - index.html - el contenido HTML generado
 - img/ - folder con las imágenes
 
-Paso 2: Ejecutar el servidor con gulp
+### Paso 2: Ejecutar el servidor con gulp
 
 Finalmente, ejecuté el servidor de desarrollo:
 
