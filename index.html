@@ -29,7 +29,7 @@
                   feedback-link="https://github.com/FabianVarela">
     
       <google-codelab-step label="Taller Práctico" duration="2">
-        <h2 is-upgraded>Bienvenido al taller de Firebase DataConnect con Flutter en el Flutter conf Latam 2025</h2>
+        <h2 is-upgraded>Bienvenido al taller de Firebase DataConnect con Flutter (No oficial)</h2>
 <h2 is-upgraded><strong>Objetivos del Taller</strong> 🎯</h2>
 <p>Al finalizar este taller, serás capaz de:</p>
 <ul>
@@ -1122,38 +1122,11 @@ mutation SeedBooks {
 
       </google-codelab-step>
     
-      <google-codelab-step label="Cierre (NO TAN CIERRE)" duration="1">
-        <h2 is-upgraded>🎉 <strong>¡Felicitaciones!</strong></h2>
-<p>Has completado exitosamente el taller completo de Firebase Data Connect + Flutter. Además de agregar funcionalidades con IA. Ahora tienes las bases para:</p>
-<ul>
-<li>Crear aplicaciones con bases de datos relacionales en Firebase</li>
-<li>Diseñar esquemas GraphQL escalables</li>
-<li>Implementar búsquedas semánticas con vectores</li>
-<li>Integrar IA de manera efectiva en aplicaciones móviles</li>
-</ul>
-<h3 is-upgraded><strong>Próximos pasos sugeridos:</strong> Para que aprendas por tu cuenta.</h3>
-<ol type="1">
-<li>Implementar sistema de recomendaciones personalizadas</li>
-<li>Crear un chatbot para consultas sobre libros</li>
-<li>Implementar OCR para catalogar libros por medio de fotos</li>
-</ol>
-<h3 is-upgraded>📚 <strong>Recursos Adicionales</strong></h3>
-<h3 is-upgraded><strong>Documentación oficial:</strong></h3>
-<ul>
-<li><a href="https://firebase.google.com/docs/data-connect" target="_blank">Firebase Data Connect</a></li>
-<li><a href="https://firebase.flutter.dev/" target="_blank">Flutter con Firebase</a></li>
-<li><a href="https://graphql.org/learn/" target="_blank">GraphQL Syntax</a></li>
-</ul>
-
-
-      </google-codelab-step>
-    
       <google-codelab-step label="Reto final" duration="30">
         <h2 is-upgraded><strong>Tiempo: 30 min</strong> 🤖</h2>
 <h2 is-upgraded><strong>Sistema Inteligente de Biblioteca con IA</strong></h2>
 <h3 is-upgraded><strong>Tu Misión, si decides aceptarla:</strong></h3>
-<p><strong>El premio:</strong> Para los mejores 3 puestos. <img alt="dash-ec-trophy" src="img/722d0129fb9ab21f.jpg"></p>
-<p>Crear un sistema de biblioteca inteligente con múltiples funcionalidades de IA que demuestre el verdadero potencial de Firebase Data Connect.</p>
+<p>Crear un sistema de biblioteca inteligente con múltiples funcionalidades de IA que demuestre el verdadero potencial de Firebase Data Connect. Aquí te dejo en cada nivel unas ayudas para habilitar o usar vectores en tu búsqueda.</p>
 <h3 is-upgraded>🏆 <strong>SISTEMA DE NIVELES</strong></h3>
 <h3 is-upgraded><strong>NIVEL 1: Búsqueda Semántica</strong></h3>
 <p><em>Funcionalidad básica con vectores</em></p>
@@ -1176,14 +1149,14 @@ mutation SeedBooks {
 <p>Ve al archivo <code>dataconnect/scheme/scheme.gql</code> y agrega lo siguiente:</p>
 <pre><code language="language-graphql" class="language-graphql">type Book @table {
   # ... campos existentes ...
-  synopsisEmbedding: Vector @col(size:768)
+  synopsisEmbedding: Vector @col(size:3072)
   searchContent: String
 }
 </code></pre>
 <p>Luego ve al archivo <code>dataconnect/digital_library/queries.gql</code> y agrega el siguiente <em>query</em>:</p>
 <pre><code language="language-graphql" class="language-graphql">query SemanticSearch($query: String!, $limit: Int = 8) @auth(level: PUBLIC) {
   books_synopsisEmbedding_similarity(
-    compare_embed: {model: &#34;textembedding-gecko@003&#34;, text: $query},
+    compare_embed: {model: &#34;gemini-embedding-001&#34;, text: $query},
     method: COSINE,
     limit: $limit
   ) {
@@ -1209,7 +1182,7 @@ mutation SeedBooks {
   book_insert(
     data: {
       # campos existentes ...
-      synopsisEmbedding_embed: {model: &#34;textembedding-gecko@003&#34;, text: $synopsis}
+      synopsisEmbedding_embed: {model: &#34;gemini-embedding-001&#34;, text: $synopsis}
     }
   )
 }
@@ -1221,7 +1194,7 @@ mutation SeedBooks {
     data: {
       synopsis: $synopsis
       synopsisEmbedding_embed: {
-        model: &#34;textembedding-gecko@003&#34;
+        model: &#34;gemini-embedding-001&#34;
         text: $synopsis
       }
     }
@@ -1238,10 +1211,36 @@ mutation DeleteMovie($id: UUID!) @auth(level: PUBLIC) {
 <p>Y luego para desplegar los cambios</p>
 <pre><code language="language-bash" class="language-bash">firebase deploy --only dataconnect
 </code></pre>
-<h3 is-upgraded><strong>Asistente IA Personalizado (Opcional)</strong></h3>
+<h3 is-upgraded><strong>Asistente IA Personalizado</strong></h3>
 <p><em>Sistema de recomendaciones inteligente</em></p>
 <p>Crear un asistente que analiza el perfil del usuario y recomienda libros personalizados usando Gemini.</p>
 <p>NOTA: Este es opcional, puedes hacerlo para mejorar tus skills o incluso para poder ganar el trofeo con más ventaja.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Cierre" duration="1">
+        <h2 is-upgraded>🎉 <strong>¡Felicitaciones!</strong></h2>
+<p>Has completado exitosamente el taller completo de Firebase Data Connect + Flutter. Además de agregar funcionalidades con IA. Ahora tienes las bases para:</p>
+<ul>
+<li>Crear aplicaciones con bases de datos relacionales en Firebase</li>
+<li>Diseñar esquemas GraphQL escalables</li>
+<li>Implementar búsquedas semánticas con vectores</li>
+<li>Integrar IA de manera efectiva en aplicaciones móviles</li>
+</ul>
+<h3 is-upgraded><strong>Próximos pasos sugeridos:</strong> Para que aprendas por tu cuenta.</h3>
+<ol type="1">
+<li>Implementar sistema de recomendaciones personalizadas</li>
+<li>Crear un chatbot para consultas sobre libros</li>
+<li>Implementar OCR para catalogar libros por medio de fotos</li>
+</ol>
+<h3 is-upgraded>📚 <strong>Recursos Adicionales</strong></h3>
+<h3 is-upgraded><strong>Documentación oficial:</strong></h3>
+<ul>
+<li><a href="https://firebase.google.com/docs/data-connect" target="_blank">Firebase Data Connect</a></li>
+<li><a href="https://firebase.flutter.dev/" target="_blank">Flutter con Firebase</a></li>
+<li><a href="https://graphql.org/learn/" target="_blank">GraphQL Syntax</a></li>
+</ul>
 
 
       </google-codelab-step>
