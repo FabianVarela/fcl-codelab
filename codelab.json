@@ -3,13 +3,13 @@
   "format": "html",
   "prefix": "https://storage.googleapis.com",
   "mainga": "UA-49880327-14",
-  "updated": "2025-11-08T09:58:57-06:00",
+  "updated": "2025-11-30T11:37:57-05:00",
   "id": "data-connect-flutter",
   "duration": 98,
   "title": "Firebase Data Connect con Flutter",
   "authors": "Fabián Varela",
   "summary": "Firebase Data Connect con Flutter",
-  "source": "/Users/fabianvarelabonett/Codelab/tools/site/codelabs/data-connect-flutter.md",
+  "source": "codelabs/data-connect-flutter.md",
   "theme": "",
   "status": [
     "published"
