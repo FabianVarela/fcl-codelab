@@ -19,7 +19,7 @@ Este comando creó/actualizó el folder data-connect-flutter/ con:
 ### Paso 2: Ejecutar el servidor con gulp
 
 Finalmente, ejecuté el servidor de desarrollo:
-```dart
+```bash
 cd /site && gulp serve
 ```
 
