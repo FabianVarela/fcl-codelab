@@ -2,7 +2,7 @@
 
 Primero, exporté el archivo Markdown del codelab usando el comando claat export:
 ```bash
-claat export -o /site /codelabs/data-connect-flutter.md
+claat export codelabs/data-connect-flutter.md
 ```
 
 Explicación:
