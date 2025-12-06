@@ -90,7 +90,7 @@ cd digital_library
 sudo npm install -g firebase-tools
 
 # Instalar el tools de Firebase Data Connect.
-curl -sL https://firebase.tools/dataconnect | bash
+curl -sL https://firebase.tools/init/dataconnect | editor=true bash
 
 # Iniciar sesión en Firebase
 firebase login
@@ -145,8 +145,8 @@ dart pub global activate flutterfire_cli
 <p>Es posible que al iniciar data connect, te haya creado unos archivos <code>gql</code> y <code>dart</code> de ejemplo, así que vamos a hacer los siguientes pasos.</p>
 <ul>
 <li>Elimina la carpeta: <code>lib/dataconnect_generated</code></li>
-<li>Renombra la carpeta <em>example</em>, por <em>digital_library</em></li>
-<li>En el archivo <code>dataconnect/dataconnect.yaml</code>, modifica <em>example</em>, por <em>digital_library</em>.</li>
+<li>Renombra la carpeta <em>example</em> que está en la raíz, <code>dataconnect/</code>, por <em>digital_librarydigi</em></li>
+<li>En el archivo <code>dataconnect/dataconnect.yaml</code>, modifica en la sección <em>connectorDirs</em> el <em>example</em>, por <em>digital_library</em>.</li>
 <li>En el archivo en <code>dataconnect/digital_library/connector.yaml</code>, reemplaza lo siguiente:</li>
 </ul>
 <pre><code language="language-yaml" class="language-yaml">connectorId: digital-library
@@ -342,8 +342,8 @@ Future&lt;void&gt; bootstrap(FutureOr&lt;Widget&gt; Function() builder) async {
 
   // Esto es para poder ejecutar nuestra app no registrada en Firebase en debug.
   await FirebaseAppCheck.instance.activate(
-    appleProvider: AppleProvider.debug,
-    androidProvider: AndroidProvider.debug,
+    providerApple: const AppleDebugProvider(),
+    providerAndroid: const AndroidDebugProvider(),
   );
 
   // runApp...
@@ -378,7 +378,7 @@ class _HomeScreenState extends State&lt;HomeScreen&gt; {
   @override
   void initState() {
     super.initState();
-    _loadBooks();
+    unawaited(_loadBooks());
   }
 
   Future&lt;void&gt; _loadBooks() async {
@@ -439,7 +439,7 @@ class _HomeScreenState extends State&lt;HomeScreen&gt; {
                   icon: const Icon(Icons.clear),
                   onPressed: () {
                     _searchController.clear();
-                    _loadBooks();
+                    unawaited(_loadBooks());
                   },
                 ),
               ),
@@ -840,45 +840,7 @@ class _AddBookScreenState extends State&lt;AddBookScreen&gt; {
         <h2 is-upgraded><strong>Tiempo: 10 min</strong> 🌱</h2>
 <h3 is-upgraded><strong>Paso 1: Agregar archivo JSON con la data</strong></h3>
 <p>Agregar la siguiente <strong>mutation</strong>, en el archivo <code>dataconnect/digital_library/mutations.gql</code>.</p>
-<pre><code language="language-graphql" class="language-graphql">mutation AddBook(
-  $title: String!
-  $author: String!
-  $isbn: String
-  $genre: [String!]!
-  $synopsis: String
-  $publicationYear: Int
-  $pages: Int
-  $coverUrl: String
-) @auth(level: NO_ACCESS) {
-  book_insert(
-    data: {
-      title: $title
-      author: $author
-      isbn: $isbn
-      genre: $genre
-      synopsis: $synopsis
-      publicationYear: $publicationYear
-      pages: $pages
-      coverUrl: $coverUrl
-    }
-  )
-}
-
-mutation CreateUser($name: String!, $email: String!) {
-  user_insert(data: { name: $name, email: $email })
-}
-
-mutation AddToReadingList($userId: UUID!, $bookId: UUID!, $status: String!) {
-  readingList_insert(
-    data: { userId: $userId, bookId: $bookId, status: $status }
-  )
-}
-
-mutation UpdateReadingStatus($readingListId: UUID!, $status: String!) {
-  readingList_update(id: $readingListId, data: { status: $status })
-}
-
-mutation SeedBooks {
+<pre><code language="language-graphql" class="language-graphql">mutation SeedBooks {
   book_insertMany(
     data: [
       {
