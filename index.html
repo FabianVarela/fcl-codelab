@@ -51,6 +51,8 @@
 <li>Extension de Firebase Data Connect para VS Code.</li>
 <li>Conocimientos básicos de SQL, Flutter, Dart y GraphQL.</li>
 </ul>
+<h2 is-upgraded><strong>Crédito gratis</strong></h2>
+<p>Este crédito solo aplica para este taller. Para acceder, ingresa <a href="https://trygcp.dev/claim/devfest-bogota" target="_blank">aquí</a></p>
 
 
       </google-codelab-step>
@@ -102,14 +104,17 @@ npm install -g firebase-tools
 
 # Configurar Firebase
 firebase login
+
+# Agregar el paquete global de FlutterFire CLI.
+dart pub global activate flutterfire_cli
 </code></pre>
 <h3 is-upgraded><strong>Paso 5: Dependencias en el proyecto de Flutter</strong></h3>
 <p>Agrega los siguientes paquetes en el archivo <code>pubspec.yaml</code>. Agregalos en orden alfábetico</p>
 <pre><code language="language-yaml" class="language-yaml">  cached_network_image: ^3.4.1
   dio: ^5.9.0
-  firebase_app_check: ^0.4.0+1
-  firebase_core: ^4.1.0
-  firebase_data_connect: ^0.2.0+2
+  firebase_app_check: ^0.4.1+2
+  firebase_core: ^4.2.1
+  firebase_data_connect: ^0.2.2
 </code></pre>
 <h3 is-upgraded><strong>Paso 6: Iniciar Data Connect</strong></h3>
 <p>Revisa en la consola de Firebase en el botón de settings.</p>
@@ -177,13 +182,16 @@ generate:
 }
 </code></pre>
 <p>Finalmente, agrega el esquema de la tabla de <code>ReadingList</code>.</p>
-<pre><code language="language-graphql" class="language-graphql">type ReadingList @table {
+<pre><code language="language-graphql" class="language-graphql">enum ReadingStatus {
+  WANT_TO_READ, READING, COMPLETED
+}
+
+type ReadingList @table {
   id: UUID! @default(expr: &#34;uuidV4()&#34;)
   userId: UUID!
   bookId: UUID!
-  status: String! # &#34;want_to_read&#34;, &#34;reading&#34;, &#34;completed&#34;
+  status: ReadingStatus! @default(value: WANT_TO_READ)
   dateAdded: Timestamp! @default(expr: &#34;request.time&#34;)
-
   user: User! @ref(fields: &#34;userId&#34;, references: &#34;id&#34;)
   book: Book! @ref(fields: &#34;bookId&#34;, references: &#34;id&#34;)
 }
@@ -569,7 +577,7 @@ class _HomeScreenState extends State&lt;HomeScreen&gt; {
   }
 }
 </code></pre>
-<p><strong>NOTA: Si mejoran el código, usando un state management como Bloc/Riverpod, es punto adicional.</strong></p>
+<p><strong>NOTA: Si mejoran el código, usando un state management como Bloc, Riverpod, Signals o hasta InheritedWidget, es punto adicional.</strong></p>
 <h3 is-upgraded><strong>Paso 5: Pantalla para agregar libros</strong></h3>
 <p>Crear el siguiente archivo <code>home/view/add_book_page.dart</code> y agregar lo siguiente.</p>
 <pre><code language="language-dart" class="language-dart">import &#39;package:digital_library/digital_library_generated/digital_library.dart&#39;;
@@ -816,7 +824,7 @@ class _AddBookScreenState extends State&lt;AddBookScreen&gt; {
   }
 }
 </code></pre>
-<p><strong>NOTA: Si mejoran el código, usando un state management como Bloc/Riverpod, es punto adicional.</strong></p>
+<p><strong>NOTA: Si mejoran el código, usando un state management como Bloc, Riverpod, Signals o hasta InheritedWidget, es punto adicional.</strong></p>
 <h3 is-upgraded><strong>Paso 6: Cambiar la pantalla inicial</strong></h3>
 <p>En el archivo <code>lib/app/view/app.dart</code>, cambia el home por la nueva pantalla de inicio.</p>
 <pre><code language="language-dart" class="language-dart">return MaterialApp(
@@ -882,7 +890,7 @@ mutation SeedBooks {
         publicationYear: 1967
         pages: 417
         rating: 4.8
-        coverUrl: &#34;https: //images-na.ssl-images-amazon.com/images/I/91TvVQS7loL.jpg&#34;
+        coverUrl: &#34;https://images-na.ssl-images-amazon.com/images/I/91TvVQS7loL.jpg&#34;
       }
       {
         title: &#34;Dune&#34;
@@ -893,7 +901,7 @@ mutation SeedBooks {
         publicationYear: 1965
         pages: 688
         rating: 4.5
-        coverUrl: &#34;https: //images-na.ssl-images-amazon.com/images/I/81zN7udGRUL.jpg&#34;
+        coverUrl: &#34;https://images-na.ssl-images-amazon.com/images/I/81zN7udGRUL.jpg&#34;
       }
       {
         title: &#34;1984&#34;
@@ -904,7 +912,7 @@ mutation SeedBooks {
         publicationYear: 1949
         pages: 328
         rating: 4.7
-        coverUrl: &#34;https: //images-na.ssl-images-amazon.com/images/I/71kxa1-0mfL.jpg&#34;
+        coverUrl: &#34;https://images-na.ssl-images-amazon.com/images/I/71kxa1-0mfL.jpg&#34;
       }
       {
         title: &#34;El Alquimista&#34;
@@ -915,7 +923,7 @@ mutation SeedBooks {
         publicationYear: 1988
         pages: 163
         rating: 4.2
-        coverUrl: &#34;https: //images-na.ssl-images-amazon.com/images/I/71aFt4+OTOL.jpg&#34;
+        coverUrl: &#34;https://images-na.ssl-images-amazon.com/images/I/71aFt4+OTOL.jpg&#34;
       }
       {
         title: &#34;Sapiens: De animales a dioses&#34;
@@ -926,7 +934,7 @@ mutation SeedBooks {
         publicationYear: 2011
         pages: 443
         rating: 4.6
-        coverUrl: &#34;https: //images-na.ssl-images-amazon.com/images/I/713jIoMO3UL.jpg&#34;
+        coverUrl: &#34;https://images-na.ssl-images-amazon.com/images/I/713jIoMO3UL.jpg&#34;
       }
       {
         title: &#34;El Código Da Vinci&#34;
@@ -937,7 +945,7 @@ mutation SeedBooks {
         publicationYear: 2003
         pages: 454
         rating: 4.1
-        coverUrl: &#34;https: //images-na.ssl-images-amazon.com/images/I/815WORuYMML.jpg&#34;
+        coverUrl: &#34;https://images-na.ssl-images-amazon.com/images/I/815WORuYMML.jpg&#34;
       }
       {
         title: &#34;Steve Jobs&#34;
@@ -948,7 +956,7 @@ mutation SeedBooks {
         publicationYear: 2011
         pages: 656
         rating: 4.4
-        coverUrl: &#34;https: //images-na.ssl-images-amazon.com/images/I/81VStYnDGrL.jpg&#34;
+        coverUrl: &#34;https://images-na.ssl-images-amazon.com/images/I/81VStYnDGrL.jpg&#34;
       }
       {
         title: &#34;El Señor de los Anillos: La Comunidad del Anillo&#34;
@@ -959,7 +967,7 @@ mutation SeedBooks {
         publicationYear: 1954
         pages: 423
         rating: 4.9
-        coverUrl: &#34;https: //images-na.ssl-images-amazon.com/images/I/91jBdG2aHML.jpg&#34;
+        coverUrl: &#34;https://images-na.ssl-images-amazon.com/images/I/91jBdG2aHML.jpg&#34;
       }
       {
         title: &#34;Orgullo y Prejuicio&#34;
@@ -970,7 +978,7 @@ mutation SeedBooks {
         publicationYear: 1813
         pages: 279
         rating: 4.3
-        coverUrl: &#34;https: //images-na.ssl-images-amazon.com/images/I/81NLDvyAHrL.jpg&#34;
+        coverUrl: &#34;https://images-na.ssl-images-amazon.com/images/I/81NLDvyAHrL.jpg&#34;
       }
       {
         title: &#34;Hábitos Atómicos&#34;
@@ -981,7 +989,7 @@ mutation SeedBooks {
         publicationYear: 2018
         pages: 320
         rating: 4.7
-        coverUrl: &#34;https: //images-na.ssl-images-amazon.com/images/I/81YkqyaFVEL.jpg&#34;
+        coverUrl: &#34;https://images-na.ssl-images-amazon.com/images/I/81YkqyaFVEL.jpg&#34;
       }
       {
         title: &#34;El Arte de la Guerra&#34;
@@ -992,7 +1000,7 @@ mutation SeedBooks {
         publicationYear: -500
         pages: 96
         rating: 4.0
-        coverUrl: &#34;https: //images-na.ssl-images-amazon.com/images/I/81L-MkU8S-L.jpg&#34;
+        coverUrl: &#34;https://images-na.ssl-images-amazon.com/images/I/81L-MkU8S-L.jpg&#34;
       }
       {
         title: &#34;Piensa y Hazte Rico&#34;
@@ -1003,7 +1011,7 @@ mutation SeedBooks {
         publicationYear: 1937
         pages: 320
         rating: 4.2
-        coverUrl: &#34;https: //images-na.ssl-images-amazon.com/images/I/71UypkUjStL.jpg&#34;
+        coverUrl: &#34;https://images-na.ssl-images-amazon.com/images/I/71UypkUjStL.jpg&#34;
       }
       {
         title: &#34;El Hobbit&#34;
@@ -1014,7 +1022,7 @@ mutation SeedBooks {
         publicationYear: 1937
         pages: 366
         rating: 4.6
-        coverUrl: &#34;https: //images-na.ssl-images-amazon.com/images/I/A1E1w1jwApL.jpg&#34;
+        coverUrl: &#34;https://images-na.ssl-images-amazon.com/images/I/A1E1w1jwApL.jpg&#34;
       }
       {
         title: &#34;Matar a un ruiseñor&#34;
@@ -1025,7 +1033,7 @@ mutation SeedBooks {
         publicationYear: 1960
         pages: 376
         rating: 4.8
-        coverUrl: &#34;https: //images-na.ssl-images-amazon.com/images/I/81aY1lxk+9L.jpg&#34;
+        coverUrl: &#34;https://images-na.ssl-images-amazon.com/images/I/81aY1lxk+9L.jpg&#34;
       }
       {
         title: &#34;La Chica del Tren&#34;
@@ -1036,7 +1044,7 @@ mutation SeedBooks {
         publicationYear: 2015
         pages: 325
         rating: 3.9
-        coverUrl: &#34;https: //images-na.ssl-images-amazon.com/images/I/81a4E0hAanL.jpg&#34;
+        coverUrl: &#34;https://images-na.ssl-images-amazon.com/images/I/81a4E0hAanL.jpg&#34;
       }
       {
         title: &#34;El Poder del Ahora&#34;
@@ -1047,7 +1055,7 @@ mutation SeedBooks {
         publicationYear: 1997
         pages: 236
         rating: 4.3
-        coverUrl: &#34;https: //images-na.ssl-images-amazon.com/images/I/71QKQ9mwV7L.jpg&#34;
+        coverUrl: &#34;https://images-na.ssl-images-amazon.com/images/I/71QKQ9mwV7L.jpg&#34;
       }
       {
         title: &#34;Inteligencia Emocional&#34;
@@ -1058,7 +1066,7 @@ mutation SeedBooks {
         publicationYear: 1995
         pages: 352
         rating: 4.1
-        coverUrl: &#34;https: //images-na.ssl-images-amazon.com/images/I/71aG+xDKSYL.jpg&#34;
+        coverUrl: &#34;https://images-na.ssl-images-amazon.com/images/I/71aG+xDKSYL.jpg&#34;
       }
       {
         title: &#34;El Padrino&#34;
@@ -1069,7 +1077,7 @@ mutation SeedBooks {
         publicationYear: 1969
         pages: 448
         rating: 4.4
-        coverUrl: &#34;https: //images-na.ssl-images-amazon.com/images/I/81F90PyxBlL.jpg&#34;
+        coverUrl: &#34;https://images-na.ssl-images-amazon.com/images/I/81F90PyxBlL.jpg&#34;
       }
       {
         title: &#34;El Gran Gatsby&#34;
@@ -1080,7 +1088,7 @@ mutation SeedBooks {
         publicationYear: 1925
         pages: 180
         rating: 4.2
-        coverUrl: &#34;https: //images-na.ssl-images-amazon.com/images/I/81af+MCATTL.jpg&#34;
+        coverUrl: &#34;https://images-na.ssl-images-amazon.com/images/I/81af+MCATTL.jpg&#34;
       }
       {
         title: &#34;El Monje que Vendió su Ferrari&#34;
@@ -1091,7 +1099,7 @@ mutation SeedBooks {
         publicationYear: 1997
         pages: 198
         rating: 4.0
-        coverUrl: &#34;https: //images-na.ssl-images-amazon.com/images/I/71BankcKkQL.jpg&#34;
+        coverUrl: &#34;https://images-na.ssl-images-amazon.com/images/I/71BankcKkQL.jpg&#34;
       }
     ]
   )
@@ -1135,15 +1143,15 @@ mutation SeedBooks {
 <li>&#34;Biografías inspiradoras&#34;</li>
 </ul>
 <p>Para este nivel necesitas usar vectores y embeddings, te dejo una definición de embeddings <a href="https://gustavo-espindola.medium.com/qu%C3%A9-son-los-embeddings-y-c%C3%B3mo-se-utilizan-en-la-inteligencia-artificial-con-python-45b751ed86a5" target="_blank">aqui</a></p>
-<h3 is-upgraded><strong>Paso 1: Habilitar los vectores</strong></h3>
+<h4 is-upgraded><strong>Paso 1: Habilitar los vectores</strong></h4>
 <ul>
 <li>Debes ir a la consola de Google <a href="https://console.cloud.google.com/iam-admin/iam" target="_blank">aquí</a> y habilitar el rol de <em>Vertex AI User</em> en el usuario de <em>firebase-adminsdk</em>.</li>
 <li>Luego debes ir a <a href="https://console.cloud.google.com/sql/instances" target="_blank">Cloud SQL</a>, seleccionas la instancia y después vas al Cloud SQL Studio.</li>
-<li>Inagresas a la base de datos con las credenciales de <em>postgres</em> y escribes el siguiente query.</li>
+<li>Ingresas a la base de datos con las credenciales de <em>postgres</em> y escribes el siguiente query.</li>
 </ul>
 <pre><code language="language-sql" class="language-sql">CREATE EXTENSION vector;
 </code></pre>
-<h3 is-upgraded><strong>Paso 2: Actualizar esquema</strong>:</h3>
+<h4 is-upgraded><strong>Paso 2: Actualizar esquema</strong>:</h4>
 <p>Ve al archivo <code>dataconnect/scheme/scheme.gql</code> y agrega lo siguiente:</p>
 <pre><code language="language-graphql" class="language-graphql">type Book @table {
   # ... campos existentes ...
@@ -1174,7 +1182,7 @@ mutation SeedBooks {
 <p>Ahora en el archivo <code>dataconnect/digital_library/mutations.gql</code>, agrega lo siguiente en el <em>mutation</em> existente:</p>
 <pre><code language="language-graphql" class="language-graphql">mutation AddBook(
   # paramétros existenes ...
-  $synopsis: String! # Vuelvelo requerido
+  $synopsis: String! # Volverlo requerido
   # paramétros existenes ...
 ) @auth(level: PUBLIC) {
   book_insert(
@@ -1209,10 +1217,12 @@ mutation DeleteMovie($id: UUID!) @auth(level: PUBLIC) {
 <p>Y luego para desplegar los cambios</p>
 <pre><code language="language-bash" class="language-bash">firebase deploy --only dataconnect
 </code></pre>
-<h3 is-upgraded><strong>Asistente IA Personalizado</strong></h3>
+<h4 is-upgraded><strong>Paso 2: Implementación en Flutter</strong>:</h4>
+<p>Ahora debes realizar la implementación en Flutter sobre lo realizado.</p>
+<h3 is-upgraded><strong>NIVEL 2: Asistente IA Personalizado</strong></h3>
 <p><em>Sistema de recomendaciones inteligente</em></p>
 <p>Crear un asistente que analiza el perfil del usuario y recomienda libros personalizados usando Gemini.</p>
-<p>NOTA: Este es opcional, puedes hacerlo para mejorar tus skills o incluso para poder ganar el trofeo con más ventaja.</p>
+<p>NOTA: Este es opcional, puedes hacerlo para mejorar tus skills o incluso para poder ganar el premio con más ventaja.</p>
 
 
       </google-codelab-step>
