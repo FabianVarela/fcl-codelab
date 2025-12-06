@@ -840,7 +840,7 @@ class _AddBookScreenState extends State&lt;AddBookScreen&gt; {
         <h2 is-upgraded><strong>Tiempo: 10 min</strong> 🌱</h2>
 <h3 is-upgraded><strong>Paso 1: Agregar archivo JSON con la data</strong></h3>
 <p>Agregar la siguiente <strong>mutation</strong>, en el archivo <code>dataconnect/digital_library/mutations.gql</code>.</p>
-<pre><code language="language-graphql" class="language-graphql">mutation SeedBooks {
+<pre><code language="language-graphql" class="language-graphql">mutation SeedBooks @auth(level: PUBLIC) {
   book_insertMany(
     data: [
       {
