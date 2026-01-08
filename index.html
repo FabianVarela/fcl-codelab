@@ -142,10 +142,10 @@ dart pub global activate flutterfire_cli
     
       <google-codelab-step label="Diseño del Esquema GraphQL" duration="15">
         <h2 is-upgraded><strong>Tiempo: 15 min</strong> 📚</h2>
-<p>Es posible que al iniciar data connect, te haya creado unos archivos <code>gql</code> y <code>dart</code> de ejemplo, así que vamos a hacer los siguientes pasos.</p>
+<p>Es posible (quizás no) que al iniciar data connect, te haya creado unos archivos <code>gql</code> y <code>dart</code> de ejemplo, así que vamos a hacer los siguientes pasos.</p>
 <ul>
-<li>Elimina la carpeta: <code>lib/dataconnect_generated</code></li>
-<li>Renombra la carpeta <em>example</em> que está en la raíz, <code>dataconnect/</code>, por <em>digital_librarydigi</em></li>
+<li>Si existe la carpeta: <code>lib/dataconnect_generated</code>, hay que borrarla</li>
+<li>Renombra la carpeta <em>example</em> que está en la raíz, <code>dataconnect/</code>, por <em>digital_library</em></li>
 <li>En el archivo <code>dataconnect/dataconnect.yaml</code>, modifica en la sección <em>connectorDirs</em> el <em>example</em>, por <em>digital_library</em>.</li>
 <li>En el archivo en <code>dataconnect/digital_library/connector.yaml</code>, reemplaza lo siguiente:</li>
 </ul>
@@ -153,7 +153,7 @@ dart pub global activate flutterfire_cli
 generate:
   dartSdk:
     - outputDir: ../../lib/digital_library_generated
-      package: digital_library_generated
+      package: digital_library_generated/generated.dart
 </code></pre>
 <h3 is-upgraded><strong>Paso 1: Crear el esquema</strong></h3>
 <p>Ve al archivo <code>dataconnect/schema/schema.gql</code>:</p>
