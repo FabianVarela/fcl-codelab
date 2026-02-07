@@ -51,8 +51,6 @@
 <li>Extension de Firebase Data Connect para VS Code.</li>
 <li>Conocimientos básicos de SQL, Flutter, Dart y GraphQL.</li>
 </ul>
-<h2 is-upgraded><strong>Crédito gratis</strong></h2>
-<p>Este crédito solo aplica para este taller. Para acceder, ingresa <a href="https://trygcp.dev/claim/devfest-bogota" target="_blank">aquí</a></p>
 
 
       </google-codelab-step>
@@ -309,6 +307,29 @@ type ReadingList @table {
 <p>Después de que todo esté listo, debes ejecutar el siguiente comando:</p>
 <pre><code language="language-bash" class="language-bash">firebase deploy --only dataconnect
 </code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Impleemntación del diseño (Opcional)" duration="10">
+        <h2 is-upgraded><strong>Tiempo: 10 min</strong> 🎨</h2>
+<h3 is-upgraded><strong>Paso 1: Usar Stich para realizar el diseño UI</strong></h3>
+<p>Este paso es opcional, por si quieres usar Stich para generar la interface del prototipado de la librería digital. Ingresa a <a href="https://stitch.withgoogle.com/" target="_blank">Stich</a> con tu cuenta de Google.</p>
+<h3 is-upgraded><strong>Paso 2: Uso del prompt para crear el diseño</strong></h3>
+<p>Esta es una posible sugerencia del prompt para que puedas crear el diseño de la librería digital. Puedes modificarlo a tu criterio para que sea más preciso.</p>
+<pre><code language="language-text" class="language-text">Puedes crear un diseño tipo app responsive con su theme en modo light y dark que sea una librería digital en la cual tenga lo siguiente:
+- Un listado de libros en donde pueda agregarlos a una lista por leer.
+- El perfil del usuario (algo sencillo).
+- Una lista de libros por leer.
+- Una pantalla de búsqueda de libros o filtrarlos por género.
+- Una pantalla de agregar un libro.
+- Iniciar sesión con Google o Apple.
+
+Adicionalmente, quiero que agregues unas pantallas en las que se pueda realizar una búsqueda semántica con IA y una de un asistente IA personalizado.
+</code></pre>
+<p>Con esto, te puede dar algo similar a este diseño.</p>
+<p class="image-container"><img alt="preview-design" src="img/8e9f951bc5c86700.png"></p>
+<p>Ya con esto, puedes usar algún modelo de IA para que puedas implementar el diseño. Recomiendo <a href="https://claude.com/product/claude-code" target="_blank">Claude Code</a> para ello, ya que es un poco más preciso para darte el diseño que generaste con Stich.</p>
 
 
       </google-codelab-step>
